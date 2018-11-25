@@ -1,0 +1,11 @@
+{% extends "main.html" %}
+{% block content %}
+	<h1>Früchte</h1>
+	<table>
+		<tr><th>ID</th><th>Name</th><th>Tauschverhältnis</th><th>Preis</th></tr>
+		{% for f in fruits %}
+			<tr><td>{{ f.id }}</td><td>{{ f.name }}</td><td>{{ f.ratio }}</td><td>{{ f.price }}</td><td><a href="{{ url_for('fruits.editFruit', fruit_id=f.id) }}">Bearbeiten</a></td><td><a href="{{ url_for('fruits.deleteFruit', fruit_id=f.id) }}">Löschen</a></td></tr>
+		{% endfor %}
+		<tr><td></td><td><a href="{{ url_for('fruits.addFruit') }}">neue Frucht</a></td><td></td></tr>
+	</table>
+{% endblock content %}
