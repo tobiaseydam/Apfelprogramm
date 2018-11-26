@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
-from flaskProg.fruits.models import Fruit
+from flaskProg.models import Fruit
 from flaskProg.fruits.forms import FruitForm
 from flaskProg import db
 

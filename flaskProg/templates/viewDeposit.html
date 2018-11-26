@@ -1,0 +1,11 @@
+{% extends "main.html" %}
+{% block content %}
+	<h1>Gutschrift</h1>
+	<h2>{{ deposit.id }} - {{ deposit.customer.name }} - {{ deposit.date.strftime('%d.%m.%Y') }}</h2>
+	<table>
+		<tr><th>ID</th><th>Kiste</th><th>Frucht</th><th>Menge (kg)</th><th>Preis pro 100kg</th></tr>
+		{% for d in deposit.depositItems %}
+			<tr><td>{{ d.id }}</td><td>{{ d.box.number }}</td><td>{{ d.box.content.name }}</td><td>{{ d.amount }}</td><td>{{ d.price }}</td></tr>
+		{% endfor %}
+	</table>
+{% endblock content %}

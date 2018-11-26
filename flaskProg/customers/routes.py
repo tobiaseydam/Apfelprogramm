@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
-from flaskProg.customers.models import Customer
+from flaskProg.models import Customer
 from flaskProg.customers.forms import CustomerForm
 from flaskProg import db
 

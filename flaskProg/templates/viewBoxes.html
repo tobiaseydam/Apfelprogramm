@@ -1,0 +1,11 @@
+{% extends "main.html" %}
+{% block content %}
+	<h1>Kisten</h1>
+	<table>
+		<tr><th>ID</th><th>Nummer</th><th>Inhalt</th><th>Abzugeben am</th></tr>
+		{% for b in boxes %}
+			<tr><td>{{ b.id }}</td><td>{{ b.number }}</td><td>{{ b.content }}</td><td>{{ b.ended.strftime('%d.%m.%Y') }}</td><td><a href="{{ url_for('boxes.editBox', box_id=b.id) }}">Bearbeiten</a></td><td><a href="{{ url_for('boxes.deleteBox', box_id=b.id) }}">Löschen</a></td></tr>
+		{% endfor %}
+		<tr><td></td><td><a href="{{ url_for('boxes.addBox') }}">neue Kiste</a></td><td></td></tr>
+	</table>
+{% endblock content %}
