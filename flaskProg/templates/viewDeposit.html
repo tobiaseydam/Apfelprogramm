@@ -2,14 +2,14 @@
 {% block content %}
 	<h1>Gutschrift</h1>
 	<h2>{{ deposit.id }} - {{ deposit.customer.name }} - {{ deposit.date.strftime('%d.%m.%Y') }}</h2>
-	<table>
+	<table class="table table-striped">
 		<tr><th>ID</th><th>Kiste</th><th>Frucht</th><th>Menge (kg)</th><th>Preis pro 100kg</th><th>Gutschrift (Liter)</th><th>Gutschrift (Euro)</th></tr>
 		{% for d in deposit.depositItems %}
 			<tr><td>{{ d.id }}</td><td>{{ d.box.number }}</td><td>{{ d.box.content.name }}</td><td>{{ '{0:.1f}'.format(d.amount) }} kg</td><td>{{ '{0:.2f}'.format(d.price) }} Euro</td><td>{{ '{0:.0f}'.format(d.amountLiter()) }} l</td><td>{{ '{0:.2f}'.format(d.amountEuro()) }} Euro</td></tr>
 		{% endfor %}
 	</table>
 	<h2>Gesamt:</h2>
-	<table>
+	<table class="table table-striped">
 		<tr><th>Frucht</th><th>Menge (kg)</th><th>Menge (Liter)</th></tr>
 			{% for d in deposit.amounts() %}
 				<tr><td>{{ d[0] }}</td><td>{{ '{0:.1f}'.format(d[1]) }} kg</td><td>{{ '{0:.0f}'.format(d[2]) }} l</td></tr>

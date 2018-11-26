@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
-from flaskProg.models import Customer
+from flaskProg.models import Customer, Fruit
 from flaskProg.customers.forms import CustomerForm
 from flaskProg import db
 
@@ -8,7 +8,8 @@ customers = Blueprint('customers', __name__)
 @customers.route("/customers")
 def viewCustomers():
 	customers = Customer.query.all()
-	return render_template('viewCustomers.html', customers=customers)
+	fruits = Fruit.query.all()
+	return render_template('viewCustomers.html', customers=customers, fruits=fruits)
 	
 @customers.route("/addCustomer", methods=['GET','POST'])
 def addCustomer():

@@ -1,0 +1,25 @@
+{% extends "main.html" %}
+{% block content %}
+	<h1>Verkäufe</h1>
+	<table class="table table-striped">
+		<tr><th>ID</th><th>Datum</th><th>Kunde</th>
+			{% for f in fruits %}
+				<th>{{ f.name }} (Liter)</th>
+			{% endfor %}
+		<th>Summe</th><th></th><th></th></tr>
+		{% for p in purchases %}
+			<tr><td>{{ p.id }}</td><td>{{ p.date.strftime('%d.%m.%Y') }}</td><td>{{ p.customer }}</td>
+			{% for f in fruits %}
+				<td>
+				{% for a in p.amounts() %}
+					{% if a[0] == f.name %}
+						{{ '{0:.1f}'.format(a[1]) }} l
+					{% endif %}
+				{% endfor %}
+				</td>
+			{% endfor %}
+			<td>{{ '{0:.2f}'.format(p.total()[0]) }} Euro</td><td><a href="{{ url_for('purchases.viewPurchase', purchase_id=p.id) }}">Anzeigen</a></td><td><a href="{{ url_for('purchases.deletePurchase', purchase_id=p.id) }}">Löschen</a></td></tr>
+		{% endfor %}
+		<tr><td></td><td><a href="{{ url_for('purchases.addPurchase') }}">neuer Verkauf</a></td><td></td></tr>
+	</table>
+{% endblock content %}

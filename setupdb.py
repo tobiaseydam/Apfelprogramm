@@ -1,5 +1,5 @@
 from flaskProg import db
-from flaskProg.models import Customer, Fruit, Box, DepositItem, Deposit
+from flaskProg.models import Customer, Fruit, Box, DepositItem, Deposit, Article, Purchase, PurchaseItem
 
 db.drop_all()
 db.create_all()
@@ -30,4 +30,22 @@ di1 = DepositItem(box=b1, amount=10, deposit=d1)
 di2 = DepositItem(box=b2, amount=20, deposit=d1)
 db.session.add(di1)
 db.session.add(di2)
+db.session.commit()
+
+a1 = Article(name="Apfelsaft klar", desc="klarer Apfelsaft", fruit=f1, amountLiter=1, price=0.55)
+a2 = Article(name="Apfelsaft naturtrueb", desc="naturtrueber Apfelsaft", fruit=f1, amountLiter=1, price=0.58)
+a3 = Article(name="Quittensaft", desc="klarer Quittensaft", fruit=f2, amountLiter=1, price=0.70)
+db.session.add(a1)
+db.session.add(a2)
+db.session.add(a3)
+db.session.commit()
+
+p1 = Purchase(date="2018-11-25", customer=c1)
+db.session.add(p1)
+db.session.commit()
+
+pi1 = PurchaseItem(article=a1, amount=10, price=a1.price, purchase=p1)
+pi2 = PurchaseItem(article=a2, amount=5, price=a2.price, purchase=p1)
+db.session.add(pi1)
+db.session.add(pi2)
 db.session.commit()

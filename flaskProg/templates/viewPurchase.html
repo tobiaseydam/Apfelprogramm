@@ -1,0 +1,19 @@
+{% extends "main.html" %}
+{% block content %}
+	<h1>Verkauf</h1>
+	<h2>{{ purchase.id }} - {{ purchase.customer.name }} - {{ purchase.date.strftime('%d.%m.%Y') }}</h2>
+	<table class="table table-striped">
+		<tr><th>ID</th><th>Artikel</th><th>Frucht</th><th>Menge</th><th>Abzug (Liter)</th><th>Preis pro Stück (Euro)</th><th>Preis (Euro)</th></tr>
+		{% for p in purchase.purchaseItems %}
+			<tr><td>{{ p.id }}</td><td>{{ p.article.name }}</td><td>{{ p.article.fruit.name }}</td><td>{{ '{0:.0f}'.format(p.amount) }}</td><td>{{ '{0:.1f}'.format(p.amountLiter()) }} l</td><td>{{ '{0:.2f}'.format(p.price) }} Euro</td><td>{{ '{0:.2f}'.format(p.total()) }} Euro</td></tr>
+		{% endfor %}
+	</table>
+	<h2>Gesamt:</h2>
+	<h3>Summe: {{ '{0:.2f}'.format(purchase.total()[0]) }} Euro</h3>
+	<table class="table table-striped">
+		<tr><th>Frucht</th><th>Menge (Liter)</th></tr>
+			{% for p in purchase.amounts() %}
+				<tr><td>{{ p[0] }}</td><td>{{ '{0:.1f}'.format(p[1]) }} l</td></tr>
+		{% endfor %}
+	</table>
+{% endblock content %}
