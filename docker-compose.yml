@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  mysql:
+    image: hypriot/rpi-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=passwd
+    ports:
+      - 3306:3306
+
+  phpmyadmin:
+    image: ebspace/armhf-phpmyadmin
+    ports:
+      - 80:80
+      - 443:443
+    links:
+      - mysql:db
+    depends_on:
+      - mysql

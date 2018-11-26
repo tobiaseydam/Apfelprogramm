@@ -27,7 +27,13 @@ class Box(db.Model):
 	depositItems = db.relationship('DepositItem', backref='box', lazy=True)
 	
 	def __repr__(self):
-		return self.number + " - " + self.content.name
+		return self.number + " - " + self.content.name + " - Noch " + str(self.freeAmount()) + " kg frei"
+	
+	def amount(self):
+		return sum(depositItem.amount for depositItem in self.depositItems)
+	
+	def freeAmount(self):
+		return 300 - self.amount()
 
 class Deposit(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -37,6 +43,20 @@ class Deposit(db.Model):
 	
 	def __repr__(self):
 		return self.id
+	
+	def amounts(self):
+		list = []
+		added = False
+		for depositItem in self.depositItems:
+			for listItem in list:
+				if(listItem[0] == depositItem.box.content.name):
+					listItem[1] += depositItem.amount
+					listItem[2] += depositItem.amountLiter()
+					added = True
+			if not added:
+				list.append([depositItem.box.content.name, depositItem.amount, depositItem.amountLiter()])
+			added = False
+		return list
 
 class DepositItem(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -47,6 +67,12 @@ class DepositItem(db.Model):
 	
 	def __repr__(self):
 		return self.id
+	
+	def amountLiter(self):
+		return self.amount * self.box.content.ratio / 100
+	
+	def amountEuro(self):
+		return self.amount * self.box.content.price / 100
 	
 	def __init__(self, box, amount, deposit):
 		self.box_id = box.id

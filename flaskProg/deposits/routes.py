@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
-from flaskProg.models import Deposit, DepositItem
+from flaskProg.models import Deposit, DepositItem, Fruit
 from flaskProg.deposits.forms import DepositForm
 from flaskProg import db
 
@@ -8,8 +8,9 @@ deposits = Blueprint('deposits', __name__)
 @deposits.route("/deposits")
 def viewDeposits():
 	deposits = Deposit.query.all()
-	return render_template('viewDeposits.html', deposits=deposits)
-	
+	fruits = Fruit.query.all()
+	return render_template('viewDeposits.html', deposits=deposits, fruits=fruits)
+
 @deposits.route("/addDeposit", methods=['GET','POST'])
 def addDeposit():
 	form = DepositForm()
@@ -30,3 +31,13 @@ def addDeposit():
 def viewDeposit(deposit_id):
 	deposit = Deposit.query.get_or_404(deposit_id)
 	return render_template('viewDeposit.html', deposit=deposit)
+
+@deposits.route("/deleteDeposit/<int:deposit_id>", methods=['GET','POST'])
+def deleteDeposit(deposit_id):
+	deposit = Deposit.query.get_or_404(deposit_id)
+	for depositItem in deposit.depositItems:
+		db.session.delete(depositItem)
+	db.session.delete(deposit)
+	db.session.commit()
+	flash('Gutschrift geloescht', 'success')
+	return redirect(url_for("deposits.viewDeposits"))

@@ -2,9 +2,23 @@
 {% block content %}
 	<h1>Gutschriften</h1>
 	<table>
-		<tr><th>ID</th><th>Datum</th><th>Kunde</th></tr>
+		<tr><th>ID</th><th>Datum</th><th>Kunde</th>
+			{% for f in fruits %}
+				<th>{{ f.name }} (kg)</th>
+			{% endfor %}
+		</tr>
 		{% for d in deposits %}
-			<tr><td>{{ d.id }}</td><td>{{ d.date.strftime('%d.%m.%Y') }}</td><td>{{ d.customer }}</td><td><a href="{{ url_for('deposits.viewDeposit', deposit_id=d.id) }}">Anzeigen</a></td><td><a href="{{ url_for('deposits.viewDeposit', deposit_id=d.id) }}">Löschen</a></td</tr>
+			<tr><td>{{ d.id }}</td><td>{{ d.date.strftime('%d.%m.%Y') }}</td><td>{{ d.customer }}</td>
+			{% for f in fruits %}
+				<td>
+				{% for a in d.amounts() %}
+					{% if a[0] == f.name %}
+						{{ a[1] }} kg
+					{% endif %}
+				{% endfor %}
+				</td>
+			{% endfor %}
+			<td><a href="{{ url_for('deposits.viewDeposit', deposit_id=d.id) }}">Anzeigen</a></td><td><a href="{{ url_for('deposits.deleteDeposit', deposit_id=d.id) }}">Löschen</a></td</tr>
 		{% endfor %}
 		<tr><td></td><td><a href="{{ url_for('deposits.addDeposit') }}">neue Gutschrift</a></td><td></td></tr>
 	</table>
