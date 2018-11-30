@@ -5,21 +5,23 @@
 		<tr><th>ID</th><th>Name</th><th>e-Mail</th>
 		{% for f in fruits %}
 			<th>{{ f.name }} (l)</th>
-		{% endfor %}<th></th><th></th></tr>
+		{% endfor %}<th></th><th></th><th></th></tr>
 		{% for c in customers %}
 			<tr><td>{{ c.id }}</td><td>{{ c.name }}</td><td>{{ c.email }}</td>
 			{% for f in fruits %}
 				<td>
 				{% for a in c.amounts() %}
 					{% if a[0] == f.name %}
-						{% if a[2] > 0 %}
+						{% if a[2] != 0 %}
 							{{ '{0:.1f}'.format(a[2]) }} l
 						{% endif %}
 					{% endif %}
 				{% endfor %}
 				</td>
 			{% endfor %}
-			<td><a href="{{ url_for('customers.editCustomer', customer_id=c.id) }}">Bearbeiten</a></td><td><a href="{{ url_for('customers.deleteCustomer', customer_id=c.id) }}">Löschen</a></td></tr>
+			<td><a href="{{ url_for('customers.viewCustomer', customer_id=c.id) }}">Anzeigen</a></td>
+			<td><a href="{{ url_for('customers.editCustomer', customer_id=c.id) }}">Bearbeiten</a></td>
+			<td><a href="{{ url_for('customers.deleteCustomer', customer_id=c.id) }}">Löschen</a></td></tr>
 		{% endfor %}
 		<tr><td></td><td><a href="{{ url_for('customers.addCustomer') }}">neuer Kunde</a></td><td></td></tr>
 	</table>

@@ -1,0 +1,64 @@
+{% extends "main.html" %}
+{% block content %}
+	<h1>Kunde</h1>
+	<h2>{{ customer.name }}</h2>
+	{% if customer.street != "" %}
+		<h4>{{ customer.street }}</h4>
+	{% endif %}
+	{% if (customer.zipcode!="")and(customer.city!="") %}
+		<h4>{{ customer.zipcode }} {{ customer.city }}</h4>
+	{% elif(customer.city!="") %}
+		<h4>{{ customer.city }}</h4>
+	{% endif %}
+	{% if (customer.phone!="")and(customer.mobile!="") %}
+		<h4>Tel.: {{ customer.phone }}/ Mobil: {{ customer.mobile }}</h4>
+	{% elif(customer.phone!="") %}
+		<h4>Tel: {{ customer.phone }}</h4>
+	{% elif(customer.mobile!="") %}
+		<h4>Mobil: {{ customer.mobile }}</h4>
+	{% endif %}
+	
+	
+	<h2>Guthaben:</h2>
+	<table class="table table-striped">
+		<tr><th>Frucht</th><th>Menge (Liter)</th></tr>
+		{% for entry in customer.amounts() %}
+			<tr><td>{{ entry[0] }}</td><td>{{ "{0:.1f}".format(entry[2]) }}</td></tr>
+		{% endfor %}
+	</table>
+	
+	<h2>Verlauf:</h2>
+	<table class="table table-striped">
+		<tr><th>Art</th><th>ID</td><th>Datum</td>
+		{% for f in fruits %}
+			<th>{{ f.name }} (Liter)</th>
+		{% endfor %}
+		<th>Betrag (Euro)</th><th></th>
+		</tr>
+		{% for entry in customer.history() %}
+			<tr><td>{{ entry.type() }}</td><td>{{ entry.id }}</td><td>{{ entry.date.strftime('%d.%m.%Y') }}</td>
+			{% for f in fruits %}
+				<td>
+				{% for e in entry.amounts() %}
+					{% if e[0] == f.name %}
+						{% if entry.type()=="Gutschrift" %}
+							{{ "{0:.1f}".format(e[2]) }} l
+						{% else %}
+							{{ "{0:.1f}".format(-e[1]) }} l
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+				</td>
+			{% endfor %}
+			<td>{{ "{0:.2f}".format(entry.total()) }} Euro</td>
+				{% if entry.type()=="Gutschrift" %}
+					<td><a href="{{ url_for('deposits.viewDeposit', deposit_id=entry.id) }}">Anzeigen</a></td>
+				{% else %}
+					<td><a href="{{ url_for('purchases.viewPurchase', purchase_id=entry.id) }}">Anzeigen</a></td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+	</table>
+	
+	
+{% endblock content %}

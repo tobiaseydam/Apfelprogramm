@@ -18,7 +18,7 @@
 				{% endfor %}
 				</td>
 			{% endfor %}
-			<td>{{ '{0:.2f}'.format(p.total()[0]) }} Euro</td><td><a href="{{ url_for('purchases.viewPurchase', purchase_id=p.id) }}">Anzeigen</a></td><td><a href="{{ url_for('purchases.deletePurchase', purchase_id=p.id) }}">Löschen</a></td></tr>
+			<td>{{ '{0:.2f}'.format(p.total()) }} Euro</td><td><a href="{{ url_for('purchases.viewPurchase', purchase_id=p.id) }}">Anzeigen</a></td><td><a href="{{ url_for('purchases.deletePurchase', purchase_id=p.id) }}">Löschen</a></td></tr>
 		{% endfor %}
 		<tr><td></td><td><a href="{{ url_for('purchases.addPurchase') }}">neuer Verkauf</a></td><td></td></tr>
 	</table>

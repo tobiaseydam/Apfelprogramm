@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
 from flaskProg.models import Deposit, DepositItem, Fruit, Box
-from flaskProg.deposits.forms import DepositItemForm, DepositForm
+from flaskProg.deposits.forms import EmptyDepositItemForm, DepositItemForm, DepositForm, FruitListForm
 from flaskProg import db
+from datetime import datetime
 
 deposits = Blueprint('deposits', __name__)
 
@@ -15,25 +16,45 @@ def viewDeposits():
 def addDeposit():
 	form = DepositForm()
 	form.validate_on_submit()
+	for e in form.errors:
+		print(e)
+	for e in form.depositItems.errors:
+		print(e)
+	for e in form.emptyDepositItems.errors:
+		print(e)
 	if form.validate_on_submit():
 		deposit = Deposit(date=form.date.data, customer=form.customer.data)
 		db.session.add(deposit)
 		for entry in form.depositItems.entries:
 			if entry.amount.data > 0:
 				box = Box.query.get_or_404(entry.box.data)
-				depositItem = DepositItem(box=box, amount=entry.amount.data, deposit=deposit)
+				depositItem = DepositItem(box=box, amount=entry.amount.data, deposit=deposit, amountLiter=entry.amountLiter.data, amountEuro=entry.amountEuro.data)
+				db.session.add(depositItem)
+		for entry in form.emptyDepositItems.entries:
+			if entry.amount.data > 0:
+				box = Box(number=entry.boxNumber.data, content=entry.boxContent.data)
+				db.session.add(box)
+				db.session.commit()
+				depositItem = DepositItem(box=box, amount=entry.amount.data, deposit=deposit, amountLiter=entry.amountLiter.data, amountEuro=entry.amountEuro.data)
 				db.session.add(depositItem)
 		db.session.commit()
 		flash('Neue Gutschrift angelegt','success')
 		return redirect(url_for("deposits.viewDeposits"))
-	boxes = Box.query.all()
-	for b in boxes:
-		item = DepositItemForm()
-		item.boxNumber = b
-		item.box = b.id
-		item.amount = 0
-		form.depositItems.append_entry(item)
-	return render_template('addDeposit.html', form=form)
+	if len(form.depositItems) == 0:
+		boxes = Box.query.all()
+		for b in boxes:
+			item = DepositItemForm()
+			item.boxNumber = b
+			item.box = b.id
+			item.amount = 0
+			item.boxContent = b.content.name
+			item.payOut = False
+			item.ratio = b.content.ratio
+			item.price = b.content.price
+			item.amountLiter = 0
+			item.amountEuro = "0.00"
+			form.depositItems.append_entry(item)
+	return render_template('addDeposit.html', form=form, fruits=FruitListForm())
 
 @deposits.route("/viewDeposit/<int:deposit_id>", methods=['GET','POST'])
 def viewDeposit(deposit_id):

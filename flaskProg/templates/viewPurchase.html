@@ -9,7 +9,7 @@
 		{% endfor %}
 	</table>
 	<h2>Gesamt:</h2>
-	<h3>Summe: {{ '{0:.2f}'.format(purchase.total()[0]) }} Euro</h3>
+	<h3>Summe: {{ '{0:.2f}'.format(purchase.total()) }} Euro</h3>
 	<table class="table table-striped">
 		<tr><th>Frucht</th><th>Menge (Liter)</th></tr>
 			{% for p in purchase.amounts() %}

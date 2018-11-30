@@ -3,8 +3,13 @@ from sqlalchemy import func
 
 class Customer(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(20), unique=True, nullable=False)
-	email = db.Column(db.String(120), unique=True, nullable=False)
+	name = db.Column(db.String(50), unique=True, nullable=False)
+	street = db.Column(db.String(50), unique=False, nullable=True)
+	zipcode = db.Column(db.String(10), unique=False, nullable=True)
+	city = db.Column(db.String(50), unique=False, nullable=True)
+	email = db.Column(db.String(120), unique=False, nullable=True)
+	phone = db.Column(db.String(20), unique=False, nullable=True)
+	mobile = db.Column(db.String(20), unique=False, nullable=True)
 	deposits = db.relationship('Deposit', backref='customer', lazy=True)
 	purchases = db.relationship('Purchase', backref='customer', lazy=True)
 	
@@ -25,14 +30,14 @@ class Customer(db.Model):
 		for p in pa:
 			for r in res:
 				if r[0] == p[0]:
-					r[1] -= p[1]
+					r[2] -= p[1]
 		return res
 	
 	def depositAmounts(self):
 		res = db.session.query(
 			Fruit.name,
 			func.sum(DepositItem.amount).label('amount'),
-			func.sum(DepositItem.amount*Fruit.ratio/100).label('amountLiter')
+			func.sum(DepositItem.amountLiter).label('amountLiter')
 		).join(DepositItem.deposit
 		).join(DepositItem.box
 		).join(Box.content
@@ -50,6 +55,26 @@ class Customer(db.Model):
 		).filter(Purchase.customer_id==self.id
 		).group_by(Fruit.name).all()
 		return res
+		
+	def history(self):
+		list = []
+		p = len(self.purchases)-1
+		d = len(self.deposits)-1
+		while(p+d>-2):
+			if(p<0):
+				list.append(self.deposits[d])
+				d-=1
+			elif(d<0):
+				list.append(self.purchases[p])
+				p-=1
+			elif(self.purchases[p].date>self.deposits[d].date):
+				list.append(self.purchases[p])
+				p-=1
+			else:
+				list.append(self.deposits[d])
+				d-=1
+		return list
+			
 
 class Fruit(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -66,11 +91,11 @@ class Box(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	number = db.Column(db.String(5), nullable=False)
 	content_id = db.Column(db.Integer, db.ForeignKey('fruit.id'), nullable=False)
-	ended = db.Column(db.DateTime, nullable=False)
+	ended = db.Column(db.DateTime, nullable=True)
 	depositItems = db.relationship('DepositItem', backref='box', lazy=True)
 	
 	def __repr__(self):
-		return self.number + " - " + self.content.name + " - Noch " + str(self.freeAmount()) + " kg frei"
+		return self.number + " - Noch " + str(self.freeAmount()) + " kg frei"
 	
 	def amount(self):
 		return sum(depositItem.amount for depositItem in self.depositItems)
@@ -85,18 +110,29 @@ class Deposit(db.Model):
 	depositItems = db.relationship('DepositItem', backref='deposit', lazy=True)
 	
 	def __repr__(self):
-		return self.id
+		return "Gutschrift: " + str(self.id) + " - " + self.date.strftime('%d.%m.%Y') + " - " + self.customer.name
 	
 	def amounts(self):
 		return db.session.query(
 			Fruit.name,
 			func.sum(DepositItem.amount).label('amount'),
-			func.sum(DepositItem.amount*Fruit.ratio/100).label('amountLiter')
+			func.sum(DepositItem.amountLiter).label('amountLiter'),
+			func.sum(DepositItem.amountEuro).label('amountEuro')
 		).join(DepositItem.deposit
 		).join(DepositItem.box
 		).join(Box.content
 		).filter(Deposit.id==self.id
 		).group_by(Fruit.name).all()
+	
+	def total(self):
+		return db.session.query(
+			func.sum(DepositItem.amountEuro).label('amountEuro')
+		).join(DepositItem.deposit
+		).filter(Deposit.id==self.id
+		).first()[0]
+		
+	def type(self):
+		return "Gutschrift"
 
 class DepositItem(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -104,21 +140,19 @@ class DepositItem(db.Model):
 	amount = db.Column(db.Numeric(5,1), nullable=False)
 	price = db.Column(db.Numeric(5,2), unique=False, nullable=False)
 	deposit_id = db.Column(db.Integer, db.ForeignKey('deposit.id'), nullable=False)
+	amountLiter = db.Column(db.Numeric(5,1), nullable=False)
+	amountEuro = db.Column(db.Numeric(5,2), nullable=False)
 	
 	def __repr__(self):
 		return self.id
 	
-	def amountLiter(self):
-		return self.amount * self.box.content.ratio / 100
-	
-	def amountEuro(self):
-		return self.amount * self.box.content.price / 100
-	
-	def __init__(self, box, amount, deposit):
+	def __init__(self, box, amount, deposit, amountLiter, amountEuro):
 		self.box_id = box.id
 		self.price = box.content.price
 		self.amount = amount
 		self.deposit_id = deposit.id
+		self.amountLiter = amountLiter
+		self.amountEuro = amountEuro
 
 class Article(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -138,11 +172,14 @@ class Purchase(db.Model):
 	customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 	purchaseItems = db.relationship('PurchaseItem', backref='purchase', lazy=True)
 	
+	def __repr__(self):
+		return "Verkauf: " + str(self.id) + " - " + self.date.strftime('%d.%m.%Y') + " - " + self.customer.name
+	
 	def total(self):
 		return db.session.query(
 			func.sum(PurchaseItem.amount*PurchaseItem.price)
 		).join(PurchaseItem.purchase
-		).filter(Purchase.id==self.id).first()
+		).filter(Purchase.id==self.id).first()[0]
 	
 	def amounts(self):
 		return db.session.query(
@@ -153,6 +190,10 @@ class Purchase(db.Model):
 		).join(Article.fruit
 		).filter(Purchase.id==self.id
 		).group_by(Fruit.name).all()
+		
+	def type(self):
+		return "Verkauf"
+		
 
 class PurchaseItem(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

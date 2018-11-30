@@ -15,7 +15,7 @@
 				</div>
 				<div class="form-group">
 					<table class="table table-striped">
-						<tr><th>Kiste</th><th>Menge</th></tr>
+						<tr><th>Kiste</th><th>Frucht</th><th>Menge (kg)</th><th>Auszahlen</th><th>Menge (Liter)</th><th>Menge (Euro)</th></tr>
 						{% for l in form.depositItems %}
 						{{ l.form.hidden_tag() }}
 							<tr>
@@ -24,9 +24,60 @@
 									{{ l.form.boxNumber.data }}
 								</td>
 								<td>
-									{{ l.form.amount(class="form-control form-control-lg") }}
+									{{ l.form.boxContent.data }}
+								</td>
+								<td>
+									{{ l.form.ratio }}
+									{{ l.form.price }}
+									{{ l.form.amount(class="form-control form-control-sm", onchange="deposit_calc_item(this);") }}
+								</td>
+								<td>
+									{{ l.form.payOut(class="form-control form-control-sm", onclick="deposit_calc_item(this);") }}
+								</td>
+								<td>
+									{{ l.form.amountLiter(class="form-control form-control-sm", readonly=true) }}
+								</td>
+								<td>
+									{{ l.form.amountEuro(class="form-control form-control-sm", readonly=true) }}
 								</td>
 							</tr>
+						{% endfor %}
+						{% for l in form.emptyDepositItems %}
+						{{ l.form.hidden_tag() }}
+							<tr>
+								<td>
+									{{ l.form.boxNumber(class="form-control form-control-sm") }}
+								</td>
+								<td>
+									{{ l.form.boxContent(class="form-control form-control-sm", onchange="deposit_calc_empty_item(this);") }}
+								</td>
+								<td>
+									{{ l.form.amount(class="form-control form-control-sm", onchange="deposit_calc_empty_item(this);") }}
+								</td>
+								<td>
+									{{ l.form.payOut(class="form-control form-control-sm", onclick="deposit_calc_empty_item(this);") }}
+								</td>
+								<td>
+									{{ l.form.amountLiter(class="form-control form-control-sm", readonly=true) }}
+								</td>
+								<td>
+									{{ l.form.amountEuro(class="form-control form-control-sm", readonly=true) }}
+								</td>
+							</tr>
+						{% endfor %}
+					</table>
+					<table class="table table-striped">
+						<tr>
+							<th>Frucht</th>
+							<th>Menge (kg)</th>
+							<th>Menge (Liter)</th>
+						</tr>
+						{% for f in fruits.items %}
+						<tr>
+							<td>{{ f.form.name.data }}</td>
+							<td>{{ f.form.amount(class="form-control form-control-sm", readonly=true) }}</td>
+							<td>{{ f.form.total(class="form-control form-control-sm", readonly=true) }}</td>
+						</tr>
 						{% endfor %}
 					</table>
 				</div>
@@ -35,5 +86,11 @@
 				{{ form.submit(class="btn btn-outline-info") }}
 			</div>
 		</form>
+		{% for f in fruits.items %}
+			{{ f.form.id }}
+			{{ f.form.name }}
+			{{ f.form.price }}
+			{{ f.form.ratio }}
+		{% endfor %}
 	</div>
 {% endblock content %}
