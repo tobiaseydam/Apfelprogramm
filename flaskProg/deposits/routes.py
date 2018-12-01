@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
-from flaskProg.models import Deposit, DepositItem, Fruit, Box
+from flaskProg.models import Deposit, DepositItem, Fruit, Box, Customer
 from flaskProg.deposits.forms import EmptyDepositItemForm, DepositItemForm, DepositForm, FruitListForm
 from flaskProg import db
 from datetime import datetime
@@ -13,15 +13,10 @@ def viewDeposits():
 	return render_template('viewDeposits.html', deposits=deposits, fruits=fruits)
 
 @deposits.route("/addDeposit", methods=['GET','POST'])
-def addDeposit():
+@deposits.route("/addDeposit/<int:customer_id>", methods=['GET','POST'])
+def addDeposit(customer_id=-1):
 	form = DepositForm()
 	form.validate_on_submit()
-	for e in form.errors:
-		print(e)
-	for e in form.depositItems.errors:
-		print(e)
-	for e in form.emptyDepositItems.errors:
-		print(e)
 	if form.validate_on_submit():
 		deposit = Deposit(date=form.date.data, customer=form.customer.data)
 		db.session.add(deposit)
@@ -54,7 +49,11 @@ def addDeposit():
 			item.amountLiter = 0
 			item.amountEuro = "0.00"
 			form.depositItems.append_entry(item)
-	return render_template('addDeposit.html', form=form, fruits=FruitListForm())
+		if(customer_id!=-1):
+			customer = Customer.query.get_or_404(customer_id)
+			form.customer.value = customer.id
+			form.customerName = customer.name
+	return render_template('addDeposit.html', form=form, fruits=FruitListForm(), emptyCustomer=(customer_id==-1))
 
 @deposits.route("/viewDeposit/<int:deposit_id>", methods=['GET','POST'])
 def viewDeposit(deposit_id):

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
-from flaskProg.models import Purchase, PurchaseItem, Fruit, Article
+from flaskProg.models import Purchase, PurchaseItem, Fruit, Article, Customer
 from flaskProg.purchases.forms import PurchaseForm, PurchaseItemForm
+from flaskProg.deposits.forms import FruitListForm
 from flaskProg import db
 
 purchases = Blueprint('purchases', __name__)
@@ -12,9 +13,9 @@ def viewPurchases():
 	return render_template('viewPurchases.html', purchases=purchases, fruits=fruits)
 
 @purchases.route("/addPurchase", methods=['GET','POST'])
-def addPurchase():
+@purchases.route("/addPurchase/<int:customer_id>", methods=['GET','POST'])
+def addPurchase(customer_id=-1):
 	form = PurchaseForm()
-	form.validate_on_submit()
 	if form.validate_on_submit():
 		purchase = Purchase(date=form.date.data, customer=form.customer.data)
 		db.session.add(purchase)
@@ -33,8 +34,16 @@ def addPurchase():
 		item.article = a.id
 		item.amount = 0
 		item.price = a.price
+		item.fruit = a.fruit.name
+		item.ratio = a.amountLiter
+		item.total = 0
 		form.purchaseItems.append_entry(item)
-	return render_template('addPurchase.html', form=form)
+	customer = None
+	if customer_id!=-1:
+		customer = Customer.query.get_or_404(customer_id)
+		form.customer.value = customer.id
+		form.customerName = customer.name
+	return render_template('addPurchase.html', form=form, fruits=FruitListForm(), customer=customer, emptyCustomer=(customer_id==-1))
 
 @purchases.route("/viewPurchase/<int:purchase_id>", methods=['GET','POST'])
 def viewPurchase(purchase_id):

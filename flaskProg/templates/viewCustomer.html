@@ -1,34 +1,34 @@
 {% extends "main.html" %}
 {% block content %}
-	<h1>Kunde</h1>
 	<h2>{{ customer.name }}</h2>
+	<p>
 	{% if customer.street != "" %}
-		<h4>{{ customer.street }}</h4>
+		{{ customer.street }}<br>
 	{% endif %}
 	{% if (customer.zipcode!="")and(customer.city!="") %}
-		<h4>{{ customer.zipcode }} {{ customer.city }}</h4>
+		{{ customer.zipcode }} {{ customer.city }}<br>
 	{% elif(customer.city!="") %}
-		<h4>{{ customer.city }}</h4>
+		{{ customer.city }}<br>
 	{% endif %}
 	{% if (customer.phone!="")and(customer.mobile!="") %}
-		<h4>Tel.: {{ customer.phone }}/ Mobil: {{ customer.mobile }}</h4>
+		Tel.: {{ customer.phone }}/ Mobil: {{ customer.mobile }}<br>
 	{% elif(customer.phone!="") %}
-		<h4>Tel: {{ customer.phone }}</h4>
+		Tel: {{ customer.phone }}<br>
 	{% elif(customer.mobile!="") %}
-		<h4>Mobil: {{ customer.mobile }}</h4>
+		Mobil: {{ customer.mobile }}<br>
 	{% endif %}
+	</p>
 	
-	
-	<h2>Guthaben:</h2>
-	<table class="table table-striped">
+	<h4>Guthaben:</h4>
+	<table class="table table-striped table-sm">
 		<tr><th>Frucht</th><th>Menge (Liter)</th></tr>
 		{% for entry in customer.amounts() %}
 			<tr><td>{{ entry[0] }}</td><td>{{ "{0:.1f}".format(entry[2]) }}</td></tr>
 		{% endfor %}
 	</table>
 	
-	<h2>Verlauf:</h2>
-	<table class="table table-striped">
+	<h4>Verlauf:</h4>
+	<table class="table table-striped table-sm">
 		<tr><th>Art</th><th>ID</td><th>Datum</td>
 		{% for f in fruits %}
 			<th>{{ f.name }} (Liter)</th>

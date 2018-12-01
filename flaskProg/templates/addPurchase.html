@@ -11,7 +11,22 @@
 				</div>
 				<div class="form-group">
 					{{ form.customer.label(class="form-control-label") }}
-					{{ form.customer(class="form-control form-control-lg") }}
+					{% if emptyCustomer %}
+						{{ form.customer(class="form-control form-control-lg") }}
+					{% else %}
+						<br>
+						{{ form.customerName }}
+						{{ form.customer(class="invisible") }}
+						<table class="table table-striped">
+							<tr><th>Frucht</th><th>Guthaben</th></tr>
+							{% for c in customer.amounts() %}
+							<tr>
+								<td>{{ c[0] }}</td>
+								<td>{{ "{0:.1f}".format(c[2]) }} l</td>
+							</tr>
+							{% endfor %}
+						</table>
+					{% endif %}
 				</div>
 				<div class="form-group">
 					<table class="table table-striped">
@@ -24,12 +39,32 @@
 									{{ l.form.article }}
 								</td>
 								<td>
-									{{ l.form.amount(class="form-control form-control-lg") }}
+									{{ l.form.amount(class="form-control form-control-sm", onchange="purchase_calc_item(this);") }}
 								</td>
 								<td>
 									{{ l.form.price.data }}
 								</td>
+								<td>
+									{{ l.form.total(class="form-control form-control-sm", readonly=true) }}
+								</td>
 							</tr>
+						{% endfor %}
+					</table>
+					<table class="table table-striped">
+						<tr>
+							<th>Frucht</th>
+							<th>Menge (Liter)</th>
+						</tr>
+						{% for f in fruits.items %}
+						<tr>
+							<td>{{ f.form.name.data }}
+								{{ f.form.id }}
+								{{ f.form.name }}
+								{{ f.form.price }}
+								{{ f.form.ratio }}</td>
+							<td>{{ f.form.total(class="form-control form-control-sm", readonly=true) }}</td>
+						</tr>
+						
 						{% endfor %}
 					</table>
 				</div>

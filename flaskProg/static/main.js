@@ -116,3 +116,54 @@ function deposit_calc_sum(){
 		len3 += 1;
 	}
 }
+
+function purchase_calc_item(e){
+	var cb_id = $(e).attr("id");
+	var id_prefix = cb_id.substring(0,cb_id.lastIndexOf("-"));
+	var amount = parseFloat(document.getElementById(id_prefix + "-amount").value);
+	var price = parseFloat(document.getElementById(id_prefix + "-price").value);
+
+	document.getElementById(id_prefix + "-total").value = parseFloat(amount * price).toFixed(2);
+	
+	purchase_calc_sum();
+}
+
+function purchase_calc_sum(){
+	var len = 0;
+	var fruitList = [];
+	while(true){
+		var itemExists = (document.getElementById("items-"+len+"-id"));
+		if(!itemExists){
+			break;
+		}
+		document.getElementById("items-"+len+"-total").value = 0;
+		entry = [len, 
+			document.getElementById("items-"+len+"-id").value,
+			document.getElementById("items-"+len+"-name").value,
+			];
+		fruitList.push(entry);
+		len += 1;
+	}
+	var len2 = 0;
+	while(true){
+		var itemExists = (document.getElementById("purchaseItems-"+len2+"-fruit"));
+		if(!itemExists){
+			break;
+		}
+		for(i=0; i<len; i++){
+			if(document.getElementById("purchaseItems-"+len2+"-fruit").value == fruitList[i][2]){
+				document.getElementById("items-"+i+"-total").value = 
+					parseFloat(document.getElementById("purchaseItems-"+len2+"-amount").value)*
+					parseFloat(document.getElementById("purchaseItems-"+len2+"-ratio").value)+
+					parseFloat(document.getElementById("items-"+i+"-total").value);
+			}
+			if(i == len-1){
+				document.getElementById("items-"+i+"-total").value = 
+					parseFloat(document.getElementById("items-"+i+"-total").value) + 
+					parseFloat(document.getElementById("purchaseItems-"+len2+"-total").value);
+				document.getElementById("items-"+i+"-total").value = parseFloat(document.getElementById("items-"+i+"-total").value).toFixed(2);
+			}
+		}
+		len2 += 1;
+	}
+}

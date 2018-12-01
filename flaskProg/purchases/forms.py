@@ -13,17 +13,21 @@ def get_articles():
 	return Article.query
 
 def get_num_articles():
-	return 5#Article.query.count()
+	return 5
 
 class PurchaseItemForm(FlaskForm):
 	articleName = StringField('Artikelname', default=0)
 	article = HiddenField('Artikel', default=0)
 	amount = DecimalField('Menge', default=0, places=0)
-	price = StringField('Preis', default=0)
+	ratio = HiddenField('Tauschverhaeltnis', default=0)
+	price = HiddenField('Preis', default=0)
+	fruit = HiddenField('Frucht', default=0)
+	total = StringField('Summe', default=0)
 
 class PurchaseForm(FlaskForm):
 	date = DateField('Datum', default=datetime.today)
 	customer = QuerySelectField('Kunde', query_factory=get_customers, get_label='name')
+	customerName = ""
 	purchaseItems = FieldList(FormField(PurchaseItemForm))
 	submit = SubmitField('Speichern')
 

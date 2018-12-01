@@ -72,6 +72,7 @@ class EmptyDepositItemForm(FlaskForm):
 class DepositForm(FlaskForm):
 	date = DateField('Datum', default=datetime.today)
 	customer = QuerySelectField('Kunde', query_factory=get_customers, get_label='name')
+	customerName = ""
 	depositItems = FieldList(FormField(DepositItemForm))
 	emptyDepositItems = FieldList(FormField(EmptyDepositItemForm), min_entries=2)
 	submit = SubmitField('Speichern')
