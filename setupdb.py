@@ -26,7 +26,7 @@ d1 = Deposit(date="2018-11-25", customer=c1)
 db.session.add(d1)
 db.session.commit()
 
-di1 = DepositItem(box=b1, amount=10, deposit=d1, amountLiter=6, amountEuro=0)
+di1 = DepositItem(box=b1, amount=100, deposit=d1, amountLiter=60, amountEuro=0)
 di2 = DepositItem(box=b2, amount=20, deposit=d1, amountLiter=12, amountEuro=0)
 db.session.add(di1)
 db.session.add(di2)

@@ -14,7 +14,7 @@ def viewBoxes():
 def addBox():
 	form = BoxForm()
 	if form.validate_on_submit():
-		box = Box(number=form.number.data, content=form.content.data, ended=form.ended.data)
+		box = Box(number=form.number.data, content=form.content.data)
 		db.session.add(box)
 		db.session.commit()
 		flash('Neue Kiste angelegt: %s' % form.number.data, 'success')
@@ -28,14 +28,12 @@ def editBox(box_id):
 	if form.validate_on_submit():
 		box.number = form.number.data
 		box.content = form.content.data
-		box.ended = form.ended.data
 		db.session.commit()
 		flash('Kiste bearbeitet: %s' % box.number, 'success')
 		return redirect(url_for("boxes.viewBoxes"))
 	elif request.method == 'GET':
 		form.number.data = box.number
 		form.content.data = box.content
-		form.ended.data = box.ended
 	return render_template('editBox.html', form=form)
 	
 @boxes.route("/deleteBox/<int:box_id>", methods=['GET','POST'])

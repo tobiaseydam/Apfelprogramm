@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, url_for, redirect, flash, request
-from flaskProg.models import Purchase, PurchaseItem, Fruit, Article, Customer
-from flaskProg.purchases.forms import PurchaseForm, PurchaseItemForm
+from flaskProg.models import Purchase, PurchaseItem, PurchaseCompensation, Fruit, Article, Customer
+from flaskProg.purchases.forms import PurchaseForm, PurchaseItemForm, PurchaseCompensationForm
 from flaskProg.deposits.forms import FruitListForm
+from flaskProg.customers.forms import CustomerDepositForm
 from flaskProg import db
 
 purchases = Blueprint('purchases', __name__)
@@ -16,14 +17,21 @@ def viewPurchases():
 @purchases.route("/addPurchase/<int:customer_id>", methods=['GET','POST'])
 def addPurchase(customer_id=-1):
 	form = PurchaseForm()
+	form.validate_on_submit()
+	print(form.errors)
 	if form.validate_on_submit():
 		purchase = Purchase(date=form.date.data, customer=form.customer.data)
 		db.session.add(purchase)
 		for entry in form.purchaseItems.entries:
-			if entry.amount.data > 0:
+			if entry.amount.data > 0: 
 				article = Article.query.get_or_404(entry.article.data)
 				purchaseItem = PurchaseItem(article=article, amount=entry.amount.data, purchase=purchase, price=article.price)
 				db.session.add(purchaseItem)
+		for entry in form.purchaseCompensations.entries:
+			if entry.amount.data > 0: 
+				fruit = Fruit.query.get_or_404(entry.fruit.data)
+				purchaseCompensation = PurchaseCompensation(fruit_id=entry.fruit.data, amount=entry.amount.data, purchase=purchase, price=fruit.pricePerLiter)
+				db.session.add(purchaseCompensation)
 		db.session.commit()
 		flash('Neuer Verkauf angelegt','success')
 		return redirect(url_for("purchases.viewPurchases"))
@@ -38,10 +46,26 @@ def addPurchase(customer_id=-1):
 		item.ratio = a.amountLiter
 		item.total = 0
 		form.purchaseItems.append_entry(item)
+	fruits = Fruit.query.all()
+	for f in fruits:
+		item = PurchaseCompensationForm()
+		item.fruitName = f.name
+		item.fruit = f.id
+		item.amount = 0
+		item.price = f.pricePerLiter
+		item.total = 0
+		form.purchaseCompensations.append_entry(item)
 	customer = None
 	if customer_id!=-1:
 		customer = Customer.query.get_or_404(customer_id)
-		form.customer.value = customer.id
+		deposits = customer.amounts()
+		for d in deposits:
+			item = CustomerDepositForm()
+			item.fruitName = d[0]
+			item.fruit = d[3]
+			item.amount = d[2]
+			form.customerDeposits.append_entry(item)
+		form.customer.data = customer
 		form.customerName = customer.name
 	return render_template('addPurchase.html', form=form, fruits=FruitListForm(), customer=customer, emptyCustomer=(customer_id==-1))
 

@@ -22,7 +22,7 @@ class Customer(db.Model):
 		res = []
 		fruits = Fruit.query.all()
 		for f in fruits:
-			res.append([f.name,0,0])
+			res.append([f.name,0,0,f])
 		for d in da:
 			for r in res:
 				if r[0] == d[0]:
@@ -46,7 +46,9 @@ class Customer(db.Model):
 		return res
 	
 	def purchaseAmounts(self):
-		res = db.session.query(
+		res = []
+		fruits = Fruit.query.all()
+		art = db.session.query(
 			Fruit.name,
 			func.sum(PurchaseItem.amount*Article.amountLiter),
 		).join(PurchaseItem.purchase
@@ -54,6 +56,22 @@ class Customer(db.Model):
 		).join(Article.fruit
 		).filter(Purchase.customer_id==self.id
 		).group_by(Fruit.name).all()
+		comp = db.session.query(
+			Fruit.name,
+			PurchaseCompensation.amount
+		).join(PurchaseCompensation.purchase
+		).join(PurchaseCompensation.fruit
+		).filter(Purchase.customer_id==self.id
+		).all()
+		for f in fruits:
+			entry = [f.name, 0]
+			for a in art:
+				if(f.name == a[0]):
+					entry[1] = a[1]
+			for c in comp:
+				if(f.name == c[0]):
+					entry[1] -= c[1]
+			res.append(entry)
 		return res
 		
 	def history(self):
@@ -81,8 +99,10 @@ class Fruit(db.Model):
 	name = db.Column(db.String(20), unique=True, nullable=False)
 	ratio = db.Column(db.Numeric(5,2), unique=False, nullable=False)
 	price = db.Column(db.Numeric(5,2), unique=False, nullable=False)
+	pricePerLiter = db.Column(db.Numeric(5,2), unique=False, nullable=False, default=0)
 	boxes = db.relationship('Box', backref='content', lazy=True)
 	articles = db.relationship('Article', backref='fruit', lazy=True)
+	purchaseCompensations = db.relationship('PurchaseCompensation', backref='fruit', lazy=True)
 	
 	def __repr__(self):
 		return self.name
@@ -171,18 +191,30 @@ class Purchase(db.Model):
 	date = db.Column(db.DateTime, nullable=False)
 	customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
 	purchaseItems = db.relationship('PurchaseItem', backref='purchase', lazy=True)
+	purchaseCompensations = db.relationship('PurchaseCompensation', backref='purchase', lazy=True)
 	
 	def __repr__(self):
 		return "Verkauf: " + str(self.id) + " - " + self.date.strftime('%d.%m.%Y') + " - " + self.customer.name
 	
 	def total(self):
-		return db.session.query(
+		art = db.session.query(
 			func.sum(PurchaseItem.amount*PurchaseItem.price)
 		).join(PurchaseItem.purchase
 		).filter(Purchase.id==self.id).first()[0]
-	
+		comp = db.session.query(
+			func.sum(PurchaseCompensation.amount*PurchaseCompensation.price)
+		).join(PurchaseCompensation.purchase
+		).filter(Purchase.id==self.id).first()[0]
+		if(art == None):
+			art = 0
+		if(comp == None):
+			comp = 0
+		return art + comp
+
 	def amounts(self):
-		return db.session.query(
+		res = []
+		fruits = Fruit.query.all()
+		art = db.session.query(
 			Fruit.name,
 			func.sum(PurchaseItem.amount*Article.amountLiter)
 		).join(PurchaseItem.purchase
@@ -190,6 +222,24 @@ class Purchase(db.Model):
 		).join(Article.fruit
 		).filter(Purchase.id==self.id
 		).group_by(Fruit.name).all()
+		comp = db.session.query(
+			Fruit.name,
+			PurchaseCompensation.amount
+		).join(PurchaseCompensation.purchase
+		).join(PurchaseCompensation.fruit
+		).filter(Purchase.id==self.id
+		).all()
+		for f in fruits:
+			entry = [f.name, 0]
+			for a in art:
+				if(f.name == a[0]):
+					entry[1] = a[1]
+			for c in comp:
+				if(f.name == c[0]):
+					entry[1] -= c[1]
+			res.append(entry)
+		return res
+		
 		
 	def type(self):
 		return "Verkauf"
@@ -208,3 +258,12 @@ class PurchaseItem(db.Model):
 	def total(self):
 		return self.amount * self.price
 
+class PurchaseCompensation(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	fruit_id = db.Column(db.Integer, db.ForeignKey('fruit.id'), nullable=False)
+	amount = db.Column(db.Numeric(5,1), nullable=False)
+	price = db.Column(db.Numeric(5,2), unique=False, nullable=False, default=0)
+	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'), nullable=False)
+	
+	def total(self):
+		return self.amount * self.price

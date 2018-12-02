@@ -1,16 +1,41 @@
 {% extends "main.html" %}
 {% block content %}
 	<h1>Verkauf</h1>
-	<h2>{{ purchase.id }} - {{ purchase.customer.name }} - {{ purchase.date.strftime('%d.%m.%Y') }}</h2>
-	<table class="table table-striped">
+	<h2>{{ purchase.customer.name }} - {{ purchase.date.strftime('%d.%m.%Y') }}</h2>
+	<p>
+	{% if purchase.customer.street != "" %}
+		{{ purchase.customer.street }}<br>
+	{% endif %}
+	{% if (purchase.customer.zipcode!="")and(purchase.customer.city!="") %}
+		{{ purchase.customer.zipcode }} {{ purchase.customer.city }}<br>
+	{% elif(purchase.customer.city!="") %}
+		{{ purchase.customer.city }}<br>
+	{% endif %}
+	{% if (purchase.customer.phone!="")and(purchase.customer.mobile!="") %}
+		Tel.: {{ purchase.customer.phone }}/ Mobil: {{ purchase.customer.mobile }}<br>
+	{% elif(purchase.customer.phone!="") %}
+		Tel: {{ purchase.customer.phone }}<br>
+	{% elif(purchase.customer.mobile!="") %}
+		Mobil: {{ purchase.customer.mobile }}<br>
+	{% endif %}
+	</p>
+	<h2>Artikel:</h2>
+	<table class="table table-striped table-sm">
 		<tr><th>ID</th><th>Artikel</th><th>Frucht</th><th>Menge</th><th>Abzug (Liter)</th><th>Preis pro Stück (Euro)</th><th>Preis (Euro)</th></tr>
 		{% for p in purchase.purchaseItems %}
 			<tr><td>{{ p.id }}</td><td>{{ p.article.name }}</td><td>{{ p.article.fruit.name }}</td><td>{{ '{0:.0f}'.format(p.amount) }}</td><td>{{ '{0:.1f}'.format(p.amountLiter()) }} l</td><td>{{ '{0:.2f}'.format(p.price) }} Euro</td><td>{{ '{0:.2f}'.format(p.total()) }} Euro</td></tr>
 		{% endfor %}
 	</table>
+	<h2>Ausgleich:</h2>
+	<table class="table table-striped table-sm">
+		<tr><th>ID</th><th>Frucht</th><th>Menge</th><th>Preis pro Stück (Euro)</th><th>Preis (Euro)</th></tr>
+		{% for p in purchase.purchaseCompensations %}
+			<tr><td>{{ p.id }}</td><td>{{ p.fruit.name }}</td><td>{{ '{0:.0f}'.format(p.amount) }}</td><td>{{ '{0:.2f}'.format(p.price) }} Euro</td><td>{{ '{0:.2f}'.format(p.total()) }} Euro</td></tr>
+		{% endfor %}
+	</table>
 	<h2>Gesamt:</h2>
 	<h3>Summe: {{ '{0:.2f}'.format(purchase.total()) }} Euro</h3>
-	<table class="table table-striped">
+	<table class="table table-striped table-sm">
 		<tr><th>Frucht</th><th>Menge (Liter)</th></tr>
 			{% for p in purchase.amounts() %}
 				<tr><td>{{ p[0] }}</td><td>{{ '{0:.1f}'.format(p[1]) }} l</td></tr>

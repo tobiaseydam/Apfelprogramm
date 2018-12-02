@@ -17,19 +17,22 @@
 						<br>
 						{{ form.customerName }}
 						{{ form.customer(class="invisible") }}
-						<table class="table table-striped">
+					<h3>Guthaben</h3>
+						<table class="table table-striped table-sm">
 							<tr><th>Frucht</th><th>Guthaben</th></tr>
-							{% for c in customer.amounts() %}
+							{% for c in form.customerDeposits %}
+							{{ c.form.hidden_tag() }}
 							<tr>
-								<td>{{ c[0] }}</td>
-								<td>{{ "{0:.1f}".format(c[2]) }} l</td>
+								<td>{{ c.form.fruitName.data }}{{ c.form.fruit }}</td>
+								<td>{{ c.form.amount(class="form-control form-control-sm", readonly=true) }}</td>
 							</tr>
 							{% endfor %}
 						</table>
 					{% endif %}
 				</div>
 				<div class="form-group">
-					<table class="table table-striped">
+					<h3>Artikel</h3>
+					<table class="table table-striped table-sm">
 						<tr><th>Artikel</th><th>Menge</th><th>Preis</th><th>Summe</th></tr>
 						{% for l in form.purchaseItems %}
 						{{ l.form.hidden_tag() }}
@@ -50,7 +53,26 @@
 							</tr>
 						{% endfor %}
 					</table>
-					<table class="table table-striped">
+					<h3>Ausgleich</h3>
+					<table class="table table-striped table-sm">
+						<tr>
+							<th>Frucht</th>
+							<th>Menge (Liter)</th>
+							<th>Preis pro Liter</th>
+							<th>Summe</th>
+						</tr>
+						{% for c in form.purchaseCompensations %}
+						{{ c.form.hidden_tag() }}
+						<tr>
+							<td>{{ c.form.fruitName(class="form-control form-control-sm", readonly=true) }}{{ c.form.fruit }}</td>
+							<td>{{ c.form.amount(class="form-control form-control-sm", readonly=true) }}</td>
+							<td>{{ c.form.price(class="form-control form-control-sm", readonly=true) }}</td>
+							<td>{{ c.form.total(class="form-control form-control-sm", readonly=true) }}</td>
+						</tr>
+						{% endfor %}
+					</table>
+					<h3>Gesamt</h3>
+					<table class="table table-striped table-sm">
 						<tr>
 							<th>Frucht</th>
 							<th>Menge (Liter)</th>

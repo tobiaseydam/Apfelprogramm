@@ -14,7 +14,7 @@ def viewFruits():
 def addFruit():
 	form = FruitForm()
 	if form.validate_on_submit():
-		fruit = Fruit(name=form.name.data, ratio=form.ratio.data, price=form.price.data)
+		fruit = Fruit(name=form.name.data, ratio=form.ratio.data, price=form.price.data, pricePerLiter=form.pricePerLiter.data)
 		db.session.add(fruit)
 		db.session.commit()
 		flash('Neue Frucht angelegt: %s' % form.name.data, 'success')
@@ -29,6 +29,7 @@ def editFruit(fruit_id):
 		fruit.name = form.name.data
 		fruit.ratio = form.ratio.data
 		fruit.price = form.price.data
+		fruit.pricePerLiter = form.pricePerLiter.data
 		db.session.commit()
 		flash('Frucht bearbeitet: %s' % fruit.name, 'success')
 		return redirect(url_for("fruits.viewFruits"))
@@ -36,6 +37,7 @@ def editFruit(fruit_id):
 		form.name.data = fruit.name
 		form.ratio.data = fruit.ratio
 		form.price.data = fruit.price
+		form.pricePerLiter.data = fruit.pricePerLiter
 	return render_template('editFruit.html', form=form)
 	
 @fruits.route("/deleteFruit/<int:fruit_id>", methods=['GET','POST'])

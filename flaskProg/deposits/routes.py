@@ -51,7 +51,7 @@ def addDeposit(customer_id=-1):
 			form.depositItems.append_entry(item)
 		if(customer_id!=-1):
 			customer = Customer.query.get_or_404(customer_id)
-			form.customer.value = customer.id
+			form.customer.data = customer
 			form.customerName = customer.name
 	return render_template('addDeposit.html', form=form, fruits=FruitListForm(), emptyCustomer=(customer_id==-1))
 

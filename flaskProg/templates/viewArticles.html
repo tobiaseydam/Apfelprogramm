@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
 	<h1>Artikel</h1>
-	<table class="table table-striped">
+	<table class="table table-striped table-sm">
 		<tr><th>ID</th><th>Name</th><th>Frucht</th><th>Menge (Liter)</th><th>Preis</th><th></th><th></th></tr>
 		{% for a in articles %}
 			<tr><td>{{ a.id }}</td><td>{{ a.name }}</td><td>{{ a.fruit.name }}</td><td>{{ '{0:.2f}'.format(a.amountLiter) }} l</td><td>{{ '{0:.2f}'.format(a.price) }} Euro</td><td><a href="{{ url_for('articles.editArticle', article_id=a.id) }}">Bearbeiten</a></td><td><a href="{{ url_for('articles.deleteArticle', article_id=a.id) }}">Löschen</a></td></tr>

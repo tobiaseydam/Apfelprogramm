@@ -144,18 +144,38 @@ function purchase_calc_sum(){
 		fruitList.push(entry);
 		len += 1;
 	}
-	var len2 = 0;
+	
+	var depListLen = 0;
+	var depositList = [];
 	while(true){
+		var itemExists = (document.getElementById("customerDeposits-"+depListLen+"-fruit"));
+		if(!itemExists){
+			break;
+		}
+		entry = [depListLen, 
+			document.getElementById("customerDeposits-"+depListLen+"-fruit").value,
+			parseFloat(document.getElementById("customerDeposits-"+depListLen+"-amount").value),
+			0
+			];
+		depositList.push(entry);
+		depListLen += 1;
+	}
+	
+	var len2 = 0;
+	while(true){	//jeden Artikel durchgehen
 		var itemExists = (document.getElementById("purchaseItems-"+len2+"-fruit"));
 		if(!itemExists){
 			break;
 		}
-		for(i=0; i<len; i++){
+		for(i=0; i<len; i++){	//jede Frucht durchgehen
 			if(document.getElementById("purchaseItems-"+len2+"-fruit").value == fruitList[i][2]){
 				document.getElementById("items-"+i+"-total").value = 
 					parseFloat(document.getElementById("purchaseItems-"+len2+"-amount").value)*
 					parseFloat(document.getElementById("purchaseItems-"+len2+"-ratio").value)+
 					parseFloat(document.getElementById("items-"+i+"-total").value);
+			}
+			if(i<depListLen && document.getElementById("purchaseItems-"+len2+"-fruit").value == depositList[i][1]){
+				depositList[i][3] += parseFloat(document.getElementById("purchaseItems-"+len2+"-amount").value);
 			}
 			if(i == len-1){
 				document.getElementById("items-"+i+"-total").value = 
@@ -166,4 +186,34 @@ function purchase_calc_sum(){
 		}
 		len2 += 1;
 	}
+	var compListLen = 0;
+	var compensationList = [];
+	var compSum = 0;
+	while(true){
+		var itemExists = (document.getElementById("purchaseCompensations-"+compListLen+"-fruitName"));
+		if(!itemExists){
+			break;
+		}
+		entry = [compListLen, 
+			document.getElementById("purchaseCompensations-"+compListLen+"-fruitName").value,
+			parseFloat(document.getElementById("purchaseCompensations-"+compListLen+"-amount").value),
+			0
+			];
+		compensationList.push(entry);
+		for(i=0; i<depListLen; i++){
+			if(document.getElementById("purchaseCompensations-"+compListLen+"-fruitName").value == depositList[i][1]){
+				document.getElementById("purchaseCompensations-"+compListLen+"-amount").value = Math.max(0,depositList[i][3]-depositList[i][2])
+				document.getElementById("purchaseCompensations-"+compListLen+"-total").value = 
+					Math.max(0,depositList[i][3]-depositList[i][2])*
+					parseFloat(document.getElementById("purchaseCompensations-"+compListLen+"-price").value);
+				compSum += parseFloat(document.getElementById("purchaseCompensations-"+compListLen+"-total").value);
+			}
+		}
+		compListLen += 1;
+	}
+	
+	document.getElementById("items-"+(len-1)+"-total").value = 
+		parseFloat(document.getElementById("items-"+(len-1)+"-total").value) + 
+		compSum;
+	document.getElementById("items-"+(len-1)+"-total").value = parseFloat(document.getElementById("items-"+(len-1)+"-total").value).toFixed(2);
 }
